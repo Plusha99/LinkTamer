@@ -1,36 +1,60 @@
 ﻿using LinkTamer.Application.Interfaces;
+using LinkTamer.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using StackExchange.Redis;
+using System.Text.Json;
 
 namespace LinkTamer.Infrastructure.Services;
 
 public class UrlShortenerService : IUrlShortenerService
 {
     private readonly IDatabase _redisDb;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public UrlShortenerService(IConnectionMultiplexer redis)
+    public UrlShortenerService(IConnectionMultiplexer redis, IHttpContextAccessor httpContextAccessor)
     {
         _redisDb = redis.GetDatabase();
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<string> ShortenUrlAsync(string originalUrl)
     {
-        string shortUrl = GenerateShortUrl();
-        await _redisDb.StringSetAsync(shortUrl, originalUrl, TimeSpan.FromDays(365));
+        string shortCode = GenerateShortUrl();
+        string domain = GetDomain();
+        string shortUrl = $"{domain}/{shortCode}";
+
+        var link = new ShortenedLink
+        {
+            Id = shortCode,
+            OriginalUrl = originalUrl,
+            ShortenedUrl = shortUrl,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        string json = JsonSerializer.Serialize(link);
+        await _redisDb.StringSetAsync(shortCode, json, TimeSpan.FromDays(365));
+
         return shortUrl;
     }
 
     public async Task<string?> GetOriginalUrlAsync(string shortUrl)
     {
-        var originalUrl = await _redisDb.StringGetAsync(shortUrl);
-        if (!originalUrl.HasValue) return null;
+        string shortCode = shortUrl.Substring(shortUrl.Length - 8);
+        var data = await _redisDb.StringGetAsync(shortCode);
 
-        await _redisDb.StringIncrementAsync($"stats:{shortUrl}");
-        return originalUrl;
+        if (!data.HasValue) return null;
+
+        var link = JsonSerializer.Deserialize<ShortenedLink>(data!);
+        if (link == null) return null;
+
+        await _redisDb.StringIncrementAsync($"stats:{shortCode}");
+        return link.OriginalUrl;
     }
 
     public async Task<int> GetClickStatsAsync(string shortUrl)
     {
-        var clicks = await _redisDb.StringGetAsync($"stats:{shortUrl}");
+        string shortCode = shortUrl.Substring(shortUrl.Length - 8);
+        var clicks = await _redisDb.StringGetAsync($"stats:{shortCode}");
         return clicks.HasValue ? (int)clicks : 0;
     }
 
@@ -39,5 +63,11 @@ public class UrlShortenerService : IUrlShortenerService
         return Convert.ToBase64String(Guid.NewGuid().ToByteArray())
             .Replace("=", "").Replace("+", "").Replace("/", "")
             .Substring(0, 8);
+    }
+
+    private string GetDomain()
+    {
+        var request = _httpContextAccessor.HttpContext?.Request;
+        return $"{request.Scheme}://{request.Host}";
     }
 }

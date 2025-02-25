@@ -27,7 +27,7 @@ public class UrlShortenerController : ControllerBase
         var originalUrl = await _urlShortenerService.GetOriginalUrlAsync(shortUrl);
         if (originalUrl == null) return NotFound();
 
-        return Redirect(originalUrl);
+        return Ok(new { originalUrl });
     }
 
     [HttpGet("stats/{shortUrl}")]
