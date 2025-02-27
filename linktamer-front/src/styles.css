@@ -1,0 +1,122 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: space-between;
+  }
+  
+  .header, .footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #282c34;
+    color: white;
+  }
+  
+  .content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+  }
+  
+  .shortener-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .url-input {
+    width: 95%;
+    padding: 15px;
+    font-size: 18px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  
+  .url-input:focus {
+    border-color: #007bff;
+  }
+  
+  .url-input.error {
+    border: 1px solid red;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 12px;
+  }
+  
+  .shorten-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .shorten-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .stats-button,
+  .redirect-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .stats-button {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .stats-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .redirect-button {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .redirect-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .stats-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+  

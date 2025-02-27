@@ -19,6 +19,12 @@ public class UrlShortenerService : IUrlShortenerService
 
     public async Task<string> ShortenUrlAsync(string originalUrl)
     {
+        string? existingShortUrl = await _redisDb.HashGetAsync("url_mappings", originalUrl);
+        if (!string.IsNullOrEmpty(existingShortUrl))
+        {
+            return existingShortUrl;
+        }
+
         string shortCode = GenerateShortUrl();
         string domain = GetDomain();
         string shortUrl = $"{domain}/{shortCode}";
@@ -32,10 +38,14 @@ public class UrlShortenerService : IUrlShortenerService
         };
 
         string json = JsonSerializer.Serialize(link);
+
+        await _redisDb.HashSetAsync("url_mappings", originalUrl, shortUrl);
+
         await _redisDb.StringSetAsync(shortCode, json, TimeSpan.FromDays(365));
 
         return shortUrl;
     }
+
 
     public async Task<string?> GetOriginalUrlAsync(string shortUrl)
     {

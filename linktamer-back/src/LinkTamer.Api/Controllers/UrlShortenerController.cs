@@ -15,25 +15,39 @@ public class UrlShortenerController : ControllerBase
     }
 
     [HttpPost("shorten")]
-    public async Task<IActionResult> Shorten([FromBody] string originalUrl)
+    public async Task<IActionResult> Shorten([FromBody] ShortenRequest request)
     {
-        var shortUrl = await _urlShortenerService.ShortenUrlAsync(originalUrl);
+        if (string.IsNullOrWhiteSpace(request.OriginalUrl))
+        {
+            return BadRequest(new { message = "URL не может быть пустым." });
+        }
+
+        var shortUrl = await _urlShortenerService.ShortenUrlAsync(request.OriginalUrl);
         return Ok(new { shortUrl });
     }
 
-    [HttpGet("{shortUrl}")]
-    public async Task<IActionResult> RedirectUrl(string shortUrl)
+    [HttpGet("redirect/{shortUrl}")]
+    public async Task<IActionResult> RedirectToOriginal(string shortUrl)
     {
         var originalUrl = await _urlShortenerService.GetOriginalUrlAsync(shortUrl);
-        if (originalUrl == null) return NotFound();
-
-        return Ok(new { originalUrl });
+        if (originalUrl == null)
+        {
+            return NotFound();
+        }
+        
+        return Redirect(originalUrl);
     }
 
     [HttpGet("stats/{shortUrl}")]
     public async Task<IActionResult> GetStats(string shortUrl)
     {
         var clicks = await _urlShortenerService.GetClickStatsAsync(shortUrl);
+
+        if (clicks == null)
+        {
+            return NotFound();
+        }
+
         return Ok(new { shortUrl, clicks });
     }
 }

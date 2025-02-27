@@ -1,7 +1,7 @@
 services:
   linktamer-api:
     build:
-      context: .
+      context: linktamer-back
       dockerfile: src/LinkTamer.Api/Dockerfile
       args:
         BUILD_CONFIGURATION: Release
@@ -15,6 +15,18 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+
+  linktamer-frontend:
+    build:
+      context: linktamer-front
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: "http://localhost:8080"
+    container_name: linktamer-front
+    ports:
+      - "80:80"
+    depends_on:
+      - linktamer-api
 
   redis:
     image: redis:7-alpine
