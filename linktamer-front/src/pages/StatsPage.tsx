@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getUrlStats } from "../api";
 import Template from "../components/Template";
 
 const StatsPage = () => {
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const shortUrl = params.get("url");
+  const { shortCode } = useParams<{ shortCode: string }>();
 
   const [clicks, setClicks] = useState<number | null>(null);
+  const [shortUrl, setShortUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (shortUrl) {
-      getUrlStats(shortUrl)
+    if (shortCode) {
+      getUrlStats(shortCode)
         .then((data) => {
+          setShortUrl(data.shortUrl);
           setClicks(data.clicks);
         })
         .catch((error) => console.error("Ошибка при получении статистики", error));
     }
-  }, [shortUrl]);
+  }, [shortCode]);
 
   return (
     <Template>
@@ -32,7 +32,7 @@ const StatsPage = () => {
             </a>
           </p>
         )}
-        {clicks !== null && clicks !== undefined ? (
+        {clicks !== null ? (
           <p>Количество переходов: {clicks}</p>
         ) : (
           <p>Нет данных о кликах</p>

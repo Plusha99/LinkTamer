@@ -7,7 +7,6 @@ import API_BASE_URL from "../config";
 const HomePage = () => {
   const [originalUrl, setOriginalUrl] = useState<string>("");
   const [shortUrl, setShortUrl] = useState<string>("");
-  const [stats, setStats] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleShorten = async () => {
@@ -30,7 +29,14 @@ const HomePage = () => {
 
   const handleGetStats = () => {
     if (!shortUrl) return;
-    navigate(`/stats?url=${encodeURIComponent(shortUrl)}`);
+    const shortCode = shortUrl.split("/").pop();
+    navigate(`/stats/${encodeURIComponent(shortCode)}`);
+  };
+
+  const handleRedirect = () => {
+    if (!shortUrl) return;
+    const shortCode = shortUrl.split('/').pop();
+    window.open(`${API_BASE_URL}/${encodeURIComponent(shortCode)}`, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -61,12 +67,11 @@ const HomePage = () => {
               </button>
               <button
                 className="redirect-button"
-                onClick={() => window.open(`${API_BASE_URL}/redirect/${encodeURIComponent(shortUrl)}`, "_blank", "noopener,noreferrer")}
+                onClick={handleRedirect}
               >
                 Перейти по ссылке
               </button>
             </div>
-            {stats !== null && <p className="stats-text">Количество переходов: {stats}</p>}
           </>
         )}
       </div>
