@@ -24,15 +24,12 @@ builder.Services.AddScoped<IUrlShortenerService, UrlShortenerService>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI();
-}
 
-app.UseCors("CustomPolicy");
 app.UseHttpsRedirection();
-app.UseAuthorization();
+app.UseCors("CustomPolicy");
 app.MapControllers();
 
 app.Run();

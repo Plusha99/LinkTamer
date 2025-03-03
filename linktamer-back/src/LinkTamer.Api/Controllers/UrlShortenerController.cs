@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LinkTamer.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("")]
 public class UrlShortenerController : ControllerBase
 {
     private readonly IUrlShortenerService _urlShortenerService;
@@ -26,7 +26,7 @@ public class UrlShortenerController : ControllerBase
         return Ok(new { shortUrl });
     }
 
-    [HttpGet("redirect/{shortUrl}")]
+    [HttpGet("{shortUrl}")]
     public async Task<IActionResult> RedirectToOriginal(string shortUrl)
     {
         var originalUrl = await _urlShortenerService.GetOriginalUrlAsync(shortUrl);
@@ -38,12 +38,12 @@ public class UrlShortenerController : ControllerBase
         return Redirect(originalUrl);
     }
 
-    [HttpGet("stats/{shortUrl}")]
-    public async Task<IActionResult> GetStats(string shortUrl)
+    [HttpGet("stats/{shortCode}")]
+    public async Task<IActionResult> GetStats(string shortCode)
     {
-        var clicks = await _urlShortenerService.GetClickStatsAsync(shortUrl);
+        var (shortUrl, clicks) = await _urlShortenerService.GetClickStatsAsync(shortCode);
 
-        if (clicks == null)
+        if (clicks == 0)
         {
             return NotFound();
         }

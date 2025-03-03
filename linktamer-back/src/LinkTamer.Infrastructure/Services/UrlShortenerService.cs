@@ -19,14 +19,19 @@ public class UrlShortenerService : IUrlShortenerService
 
     public async Task<string> ShortenUrlAsync(string originalUrl)
     {
-        string? existingShortUrl = await _redisDb.HashGetAsync("url_mappings", originalUrl);
+        string domain = GetDomain();
+        if (originalUrl.StartsWith(domain))
+        {
+            return originalUrl;
+        }
+
+        string existingShortUrl = await _redisDb.HashGetAsync("url_mappings", originalUrl);
         if (!string.IsNullOrEmpty(existingShortUrl))
         {
             return existingShortUrl;
         }
 
         string shortCode = GenerateShortUrl();
-        string domain = GetDomain();
         string shortUrl = $"{domain}/{shortCode}";
 
         var link = new ShortenedLink
@@ -46,26 +51,34 @@ public class UrlShortenerService : IUrlShortenerService
         return shortUrl;
     }
 
-
-    public async Task<string?> GetOriginalUrlAsync(string shortUrl)
+    public async Task<string> GetOriginalUrlAsync(string shortCode)
     {
-        string shortCode = shortUrl.Substring(shortUrl.Length - 8);
         var data = await _redisDb.StringGetAsync(shortCode);
 
-        if (!data.HasValue) return null;
+        if (!data.HasValue)
+        {
+            return null;
+        }
 
         var link = JsonSerializer.Deserialize<ShortenedLink>(data!);
-        if (link == null) return null;
+        if (link == null)
+        {
+            return null;
+        }
 
         await _redisDb.StringIncrementAsync($"stats:{shortCode}");
         return link.OriginalUrl;
     }
 
-    public async Task<int> GetClickStatsAsync(string shortUrl)
+    public async Task<(string ShortUrl, int Clicks)> GetClickStatsAsync(string shortCode)
     {
-        string shortCode = shortUrl.Substring(shortUrl.Length - 8);
         var clicks = await _redisDb.StringGetAsync($"stats:{shortCode}");
-        return clicks.HasValue ? (int)clicks : 0;
+        var data = await _redisDb.StringGetAsync(shortCode); 
+
+        if (!data.HasValue) return (null, 0);
+
+        var link = JsonSerializer.Deserialize<ShortenedLink>(data!);
+        return (link?.ShortenedUrl, clicks.HasValue ? (int)clicks : 0);
     }
 
     private string GenerateShortUrl()
