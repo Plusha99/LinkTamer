@@ -75,7 +75,10 @@ public class UrlShortenerService : IUrlShortenerService
         var clicks = await _redisDb.StringGetAsync($"stats:{shortCode}");
         var data = await _redisDb.StringGetAsync(shortCode); 
 
-        if (!data.HasValue) return (null, 0);
+        if (!data.HasValue)
+        {
+            return (null, 0);
+        }
 
         var link = JsonSerializer.Deserialize<ShortenedLink>(data!);
         return (link?.ShortenedUrl, clicks.HasValue ? (int)clicks : 0);
