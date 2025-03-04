@@ -1,0 +1,89 @@
+name: dockercompose6552528411476558241
+services:
+  linktamer-api:
+    build:
+      context: C:\Users\ilia1\source\repos\LinkTamer
+      dockerfile: src/LinkTamer.Api/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    container_name: linktamer-api
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ASPNETCORE_HTTPS_PORTS: "8081"
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Redis: redis:6379
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 8080
+      protocol: tcp
+    - mode: ingress
+      target: 8080
+      published: "8080"
+      protocol: tcp
+    - mode: ingress
+      target: 8081
+      protocol: tcp
+    volumes:
+    - type: bind
+      source: C:\Users\ilia1\AppData\Roaming/Microsoft/UserSecrets
+      target: /home/app/.microsoft/usersecrets
+      read_only: true
+      bind:
+        create_host_path: true
+    - type: bind
+      source: C:\Users\ilia1\AppData\Roaming/Microsoft/UserSecrets
+      target: /root/.microsoft/usersecrets
+      read_only: true
+      bind:
+        create_host_path: true
+    - type: bind
+      source: C:\Users\ilia1\AppData\Roaming/ASP.NET/Https
+      target: /home/app/.aspnet/https
+      read_only: true
+      bind:
+        create_host_path: true
+    - type: bind
+      source: C:\Users\ilia1\AppData\Roaming/ASP.NET/Https
+      target: /root/.aspnet/https
+      read_only: true
+      bind:
+        create_host_path: true
+  redis:
+    command:
+    - redis-server
+    - --appendonly
+    - "yes"
+    container_name: linktamer-redis
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      timeout: 3s
+      interval: 5s
+      retries: 5
+    image: redis:7-alpine
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 6379
+      published: "6379"
+      protocol: tcp
+    volumes:
+    - type: volume
+      source: redis_data
+      target: /data
+      volume: {}
+networks:
+  default:
+    name: dockercompose6552528411476558241_default
+volumes:
+  redis_data:
+    name: dockercompose6552528411476558241_redis_data

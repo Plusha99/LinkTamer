@@ -1,0 +1,16 @@
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\bin\Debug\net8.0\LinkTamer.Application.deps.json
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\bin\Debug\net8.0\LinkTamer.Application.dll
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\bin\Debug\net8.0\LinkTamer.Application.pdb
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\bin\Debug\net8.0\LinkTamer.Domain.dll
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\bin\Debug\net8.0\LinkTamer.Domain.pdb
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\LinkTamer.Application.csproj.AssemblyReference.cache
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\LinkTamer.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\LinkTamer.Application.AssemblyInfoInputs.cache
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\LinkTamer.Application.AssemblyInfo.cs
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\LinkTamer.Application.csproj.CoreCompileInputs.cache
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\LinkTamer.Application.sourcelink.json
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\LinkTame.2293EB4C.Up2Date
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\LinkTamer.Application.dll
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\refint\LinkTamer.Application.dll
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\LinkTamer.Application.pdb
+C:\Users\ilia1\source\repos\LinkTamer\src\LinkTamer.Application\obj\Debug\net8.0\ref\LinkTamer.Application.dll
