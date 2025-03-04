@@ -1,3 +1,4 @@
+using LinkTamer.Api.Middleware;
 using LinkTamer.Application.Interfaces;
 using LinkTamer.Infrastructure.Extensions;
 using LinkTamer.Infrastructure.Services;
@@ -18,12 +19,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Подключаем Redis
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("Redis"));
 builder.Services.AddScoped<IUrlShortenerService, UrlShortenerService>();
 
 var app = builder.Build();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

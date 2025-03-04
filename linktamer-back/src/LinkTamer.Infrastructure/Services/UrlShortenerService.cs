@@ -2,7 +2,6 @@
 using LinkTamer.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Redis;
-using System.Text.Json;
 
 namespace LinkTamer.Infrastructure.Services;
 
@@ -19,69 +18,78 @@ public class UrlShortenerService : IUrlShortenerService
 
     public async Task<string> ShortenUrlAsync(string originalUrl)
     {
-        string domain = GetDomain();
-        if (originalUrl.StartsWith(domain))
+        var normalizerUrl = originalUrl.ToLower();
+
+        var existingShortUrl = await _redisDb.HashGetAsync("url_mappings", normalizerUrl);
+        if (!existingShortUrl.IsNullOrEmpty)
+        {
+            return existingShortUrl!;
+        }
+
+        var domain = GetDomain();
+        var shortCode = GenerateShortUrl();
+        var shortUrl = $"{domain}/{shortCode}";
+
+        if (normalizerUrl.StartsWith(domain))
         {
             return originalUrl;
         }
 
-        string existingShortUrl = await _redisDb.HashGetAsync("url_mappings", originalUrl);
-        if (!string.IsNullOrEmpty(existingShortUrl))
-        {
-            return existingShortUrl;
-        }
-
-        string shortCode = GenerateShortUrl();
-        string shortUrl = $"{domain}/{shortCode}";
-
         var link = new ShortenedLink
         {
             Id = shortCode,
-            OriginalUrl = originalUrl,
+            OriginalUrl = normalizerUrl,
             ShortenedUrl = shortUrl,
-            CreatedAt = DateTime.UtcNow
         };
 
-        string json = JsonSerializer.Serialize(link);
+        await _redisDb.HashSetAsync(shortCode, new HashEntry[]
+        {
+            new HashEntry("original_url", normalizerUrl),
+            new HashEntry("short_url", shortUrl),
+            new HashEntry("clicks", 0),
+        });
 
-        await _redisDb.HashSetAsync("url_mappings", originalUrl, shortUrl);
-
-        await _redisDb.StringSetAsync(shortCode, json, TimeSpan.FromDays(365));
+        await _redisDb.HashSetAsync("url_mappings", normalizerUrl, shortUrl);
 
         return shortUrl;
     }
 
     public async Task<string> GetOriginalUrlAsync(string shortCode)
     {
-        var data = await _redisDb.StringGetAsync(shortCode);
+        var data = await _redisDb.HashGetAllAsync(shortCode);
 
-        if (!data.HasValue)
+        if (data.Length == 0)
         {
             return null;
         }
 
-        var link = JsonSerializer.Deserialize<ShortenedLink>(data!);
-        if (link == null)
+        var fields = data.ToDictionary(entry => entry.Name.ToString(), entry => entry.Value.ToString());
+
+        if (!fields.TryGetValue("original_url", out var originalUrl))
         {
             return null;
         }
 
-        await _redisDb.StringIncrementAsync($"stats:{shortCode}");
-        return link.OriginalUrl;
+        await _redisDb.HashIncrementAsync(shortCode, "clicks");
+
+        return originalUrl;
     }
 
     public async Task<(string ShortUrl, int Clicks)> GetClickStatsAsync(string shortCode)
     {
-        var clicks = await _redisDb.StringGetAsync($"stats:{shortCode}");
-        var data = await _redisDb.StringGetAsync(shortCode); 
+        var data = await _redisDb.HashGetAllAsync(shortCode);
 
-        if (!data.HasValue)
+        if (data.Length == 0)
         {
             return (null, 0);
         }
 
-        var link = JsonSerializer.Deserialize<ShortenedLink>(data!);
-        return (link?.ShortenedUrl, clicks.HasValue ? (int)clicks : 0);
+        var fields = data.ToDictionary(entry => entry.Name.ToString(), entry => entry.Value.ToString());
+
+        fields.TryGetValue("short_url", out var shortUrl);
+        fields.TryGetValue("clicks", out var clicksStr);
+
+        return (shortUrl, int.TryParse(clicksStr, out var clicks) ? clicks : 0);
     }
 
     private string GenerateShortUrl()

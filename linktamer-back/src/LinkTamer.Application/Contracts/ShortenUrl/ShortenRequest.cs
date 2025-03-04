@@ -1,4 +1,4 @@
-﻿namespace LinkTamer.Api.Controllers
+﻿namespace LinkTamer.Application.Contracts.ShortenUrl
 {
     public class ShortenRequest
     {
